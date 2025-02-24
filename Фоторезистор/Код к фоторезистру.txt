@@ -1,0 +1,9 @@
+#define PIN_PHOTO_SENSOR A0
+
+void setup() {
+}
+
+void loop() {
+  int val = analogRead(PIN_PHOTO_SENSOR);
+  Serial.println(val);
+}
