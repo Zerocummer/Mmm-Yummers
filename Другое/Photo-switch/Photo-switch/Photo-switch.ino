@@ -1,13 +1,22 @@
-#include <taskscheduler.h>
+#include <TaskScheduler.h>
 int val; // показания фоторезистора
 int lucs; // освещённость в люксах
 boolean recivedFlag = false; // флаг получения данных
 String photoData;
 String strData;
 
+//прототип функции sendData
+void sendData();
+
+Scheduler user_Scheduler;
+Task taskSend(TASK_MILLISECOND * 3000, TASK_FOREVER, &sendData);
+
 void setup() {
   Serial.begin(9600);
   pinMode(A0, INPUT);
+  //Добавляем задание в обработчик
+  user_Scheduler.addTask(taskSend);
+  taskSend.enable();
 }
 
 String recieveData(){ // приём данных с COM-порта
@@ -26,6 +35,7 @@ String recieveData(){ // приём данных с COM-порта
 }
 
 void loop() {
+  user_Scheduler.execute();
  // photoData = recieveData(); 
   val = analogRead(A0); // находим показания фоторезистора
  // if (photoData != ""){
@@ -41,6 +51,10 @@ void loop() {
       lucs = map(val, 500, 1023, 110, 0);
       break;
   }
-  Serial.println(lucs); // вывод люксов
-  delay(2000);
+  //Serial.println(lucs); // вывод люксов
+  //delay(2000);
    }
+
+void sendData(){
+  Serial.println(lucs);
+}
