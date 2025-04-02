@@ -7,6 +7,7 @@ String strData;
 
 //прототип функции sendData
 void sendData();
+void calculationToLucs();
 
 Scheduler user_Scheduler;
 Task taskSend(TASK_MILLISECOND * 3000, TASK_FOREVER, &sendData);
@@ -33,13 +34,8 @@ String recieveData(){ // приём данных с COM-порта
   }
   else return "";
 }
-
-void loop() {
-  user_Scheduler.execute();
- // photoData = recieveData(); 
+void calculationToLucs(){
   val = analogRead(A0); // находим показания фоторезистора
- // if (photoData != ""){
-   // val = photoData.toInt();
   switch(val){ // перевод показаний фоторезистора в люксы
     case 0 ... 340:
       lucs = map(val, 0, 340, 1350, 300);
@@ -51,6 +47,13 @@ void loop() {
       lucs = map(val, 500, 1023, 110, 0);
       break;
   }
+}
+void loop() {
+  user_Scheduler.execute();
+  calculationToLucs();
+ // photoData = recieveData(); 
+ // if (photoData != ""){
+   // val = photoData.toInt();
   //Serial.println(lucs); // вывод люксов
   //delay(2000);
    }
