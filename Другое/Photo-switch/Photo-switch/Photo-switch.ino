@@ -1,11 +1,16 @@
 #include <TaskScheduler.h>
+#include <Servo.h>
 int val; // показания фоторезистора
 int lucs; // освещённость в люксах
+int maxIndex;
 boolean recivedFlag = false; // флаг получения данных
 String photoData;
 String strData;
+Servo myservo;
+const int photoResistorPins[4] = {A0, A1, A2, A3};
+int allValues[4];
 
-//прототип функции sendData
+//прототип функции sendData и calculationToLucs
 void sendData();
 void calculationToLucs();
 
@@ -14,7 +19,7 @@ Task taskSend(TASK_MILLISECOND * 3000, TASK_FOREVER, &sendData);
 
 void setup() {
   Serial.begin(9600);
-  pinMode(A0, INPUT);
+  myservo.attach(9);
   //Добавляем задание в обработчик
   user_Scheduler.addTask(taskSend);
   taskSend.enable();
@@ -35,7 +40,6 @@ String recieveData(){ // приём данных с COM-порта
   else return "";
 }
 void calculationToLucs(){
-  val = analogRead(A0); // находим показания фоторезистора
   switch(val){ // перевод показаний фоторезистора в люксы
     case 0 ... 340:
       lucs = map(val, 0, 340, 1350, 300);
@@ -50,7 +54,19 @@ void calculationToLucs(){
 }
 void loop() {
   user_Scheduler.execute();
+  for (int i = 0; i < 4; i++) {
+    allValues[i] = analogRead(photoResistorPins[i]);
+  }
+
+  int maxIndex = 0; // находим самый освещённый фоторезистор
+  for (int i = 1; i < 4; i++) {
+    if (allValues[i] > allValues[maxIndex]) {
+      maxIndex = i;
+    }
+  }
+  val = analogRead(photoResistorPins[maxIndex]);
   calculationToLucs();
+  myservo.write(maxIndex * 90);
  // photoData = recieveData(); 
  // if (photoData != ""){
    // val = photoData.toInt();
