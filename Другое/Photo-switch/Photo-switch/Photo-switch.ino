@@ -20,6 +20,10 @@ Task taskSend(TASK_MILLISECOND * 3000, TASK_FOREVER, &sendData);
 void setup() {
   Serial.begin(9600);
   myservo.attach(9);
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
   //Добавляем задание в обработчик
   user_Scheduler.addTask(taskSend);
   taskSend.enable();
