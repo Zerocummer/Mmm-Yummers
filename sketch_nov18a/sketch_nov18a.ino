@@ -1,44 +1,49 @@
 #define ENCODER_CLK A0
 #define ENCODER_DT  A1
-#define BUTTON_PIN 4
+#define BUTTON_PIN1 2
 
-const int ledPins[] = {3, 5, 6, 9, 10, 11};
+const int ledPins[] = {11, 10, 9, 6, 5, 3};
 int lastClk = HIGH;
 int brightness = map(analogRead(A3), 0, 1024, 0, 256);
-int activeLed = 0;
+int activeLed = 3;
 int ledCount = 6;
 int state = 0;
 bool ledState = false;
-const long interval = 100;
+const long interval = 1000;
 unsigned long previousMillis = 0;
 const unsigned long debounceDelay = 50;
 unsigned long lastButtonPress = 0;
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(9600);
   pinMode(A2, INPUT);
   pinMode(A3, INPUT);
+  pinMode(BUTTON_PIN1, INPUT_PULLUP);
   pinMode(ENCODER_CLK, INPUT);
   pinMode(ENCODER_DT, INPUT);
-  for (int i = 0; i < 4; i++){
+  for (int i = 0; i < 6; i++){
     pinMode(ledPins[i], OUTPUT);
   }
   start();
 }
 
 void loop() {
-  switch(state){
-    case 0:
-    checkButton();
-    break;
-    case 1:
-    
-    break;
+  brightness = map(analogRead(A3), 0, 1024, 51, 256);
+  digitalWrite(ledPins[activeLed], brightness);
+  Serial.println(analogRead(A3));
+}
+
+void forxx(){ //цикл светодиода слева-направо
+  unsigned long currentMillis = millis();
+  if (currentMillis - previousMillis >= interval){
+    previousMillis = currentMillis;
+    analogWrite(ledPins[activeLed], HIGH);
+    analogWrite(ledPins[activeLed] - 1, LOW);
+    if (activeLed == 5){
+      activeLed = 0;
+    }
   }
-  /*encoderCheck();
-  activeLed = (ledCount + activeLed) % ledCount;
-  brightness = map(analogRead(A3), 0, 1024, 0, 256);*/
 }
 
 void updateLeds(){ //обновление актуальности светодиода
@@ -52,17 +57,13 @@ void updateLeds(){ //обновление актуальности светод�
   }
 }
 
-void start(){ //функция старта
-  for (int j = 0; j < 5; j++){
-  for (int i = 0; i < ledCount; i++){
+void start(){ //функция первичного теста работоспособности
+  for (int i = 0; i < 6; i++){
     digitalWrite(ledPins[i], HIGH);
+    digitalWrite(ledPins[i - 1], LOW);
+    delay(1000);
   }
-  delay(200);
-  for (int i = 0; i < ledCount; i++){
-    digitalWrite(ledPins[i], LOW);
-  }
-  delay(200);
-  }
+  digitalWrite(ledPins[5], LOW);
 }
 
 void encoderCheck(){ //функция проверки энкодера и последующего действия в зависимости в какую сторону повернулся энкодер
@@ -96,18 +97,17 @@ void blink(){ //моргание светодиодов
 }
 
 void checkButton() { //читаем состояние кнопки
-  int buttonState = digitalRead(BUTTON_PIN);
+  int buttonState = digitalRead(BUTTON_PIN1);
   unsigned long currentTime = millis();
   if (buttonState == HIGH && (currentTime - lastButtonPress) > debounceDelay) {
     lastButtonPress = currentTime;
     if (state == 0) {
       state = 1;
-      updateLeds(); 
     } else {
       state = 0; 
     }
-    while(digitalRead(BUTTON_PIN) == HIGH) {
-      delay(10);
+    while(digitalRead(BUTTON_PIN1) == HIGH) {
+      delay(20);
     }
   }
 }
