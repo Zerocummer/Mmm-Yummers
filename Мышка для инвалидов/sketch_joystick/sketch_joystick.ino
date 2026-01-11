@@ -5,7 +5,7 @@
  MPU6050 mpu(Wire);
  #define ENC_A 4
  #define ENC_B 5
- bool p0, p1;
+ bool prev;
  int wheel = 0;
  unsigned long timer = 0;
  int Xang, Yang, Zang;
@@ -23,6 +23,7 @@
   mpu.calcOffsets(); 
   Mouse.begin();    
   Keyboard.begin(); 
+  prev = digitalRead(ENC_A);
  }
  void loop() {
  mpu.update();  
@@ -88,7 +89,7 @@
      else if (Xang < -6) {
      Xang = map(Xang, -10, -6, -10, -1); 
      }
-     Mouse.move(Yang, Xang, 0);
+     Mouse.move(Yang, Xang, 0); //двигаем мышь
    }
    pollEnc(digitalRead(ENC_A), digitalRead(ENC_B));
    if (wheel != 0){
@@ -96,16 +97,16 @@
    }
    wheel = 0;
    timer = millis();
-   }}
-  void pollEnc(bool e0, bool e1) {
-  if (p0 ^ p1 ^ e0 ^ e1) {
-      if (p1 ^ e0){
-        wheel = 1;
+   }
+}
+  void pollEnc(bool e0, bool e1) { //определяем поворот колёсика мыши
+      if (prev != e0) {
+          if (e1 ^ e0){ 
+            wheel = -1;
+          }
+          else{
+            wheel == 1;
+          }
+          prev = e0;
       }
-      else{
-        wheel = -1;
-      }
-      p0 = e0;
-      p1 = e1;
-    }
 }
