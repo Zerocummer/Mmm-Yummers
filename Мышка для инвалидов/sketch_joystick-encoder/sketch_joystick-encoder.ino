@@ -3,8 +3,16 @@
  #include <Mouse.h>
  #include <Keyboard.h>
  MPU6050 mpu(Wire);
- #define ENC_A 4
- #define ENC_B 5
+#define PIN_S1 4
+#define PIN_S2 5
+volatile int8_t encDir = 0;
+uint8_t lastAB = 0;
+static const int8_t encTable[16] = {
+   0, -1,  1,  0,
+   1,  0,  0, -1,
+  -1,  0,  0,  1,
+   0,  1, -1,  0
+};
  bool prev;
  int wheel = 0;
  unsigned long timer = 0;
@@ -13,6 +21,9 @@
  int middenknop = 8;
  int rechterknop = 9;
  void setup() {
+  pinMode(PIN_S1, INPUT_PULLUP);
+  pinMode(PIN_S2, INPUT_PULLUP);
+  lastAB = (digitalRead(PIN_S1) << 1) | digitalRead(PIN_S2);
   pinMode(linkerknop, INPUT_PULLUP);
   pinMode(middenknop, INPUT_PULLUP);
   pinMode(rechterknop, INPUT_PULLUP);
@@ -22,12 +33,11 @@
   delay(1000);
   mpu.calcOffsets(); 
   Mouse.begin();    
-  Keyboard.begin(); 
-  prev = digitalRead(ENC_A);
+  Keyboard.begin();
  }
  void loop() {
  mpu.update();  
- if ((millis() - timer) > 60) { 
+ if (millis() - timer > 60) { 
   //проверяем наклон гироскопа
   Xang=mpu.getAngleX();
   Yang=mpu.getAngleY();
@@ -90,7 +100,23 @@
      Xang = map(Xang, -10, -6, -10, -1); 
      }
      Mouse.move(Yang, Xang, 0); //двигаем мышь
-   }
+     }
+     static uint32_t lastTime = 0;
+     static int8_t accum = 0;
+     uint8_t newAB = (digitalRead(PIN_S1) << 1) | digitalRead(PIN_S2);
+     uint8_t idx = (lastAB << 2) | newAB;
+     int8_t step = encTable[idx & 0x0F];
+     if (step) {
+       accum += step;
+       lastAB = newAB;
+     }
+     if (accum >= 2) { //отслеживаем энкодер(колёсико мыши)
+      Mouse.move(0, 0, -1);
+      accum = 0;
+    } else if (accum <= -2) {
+      Mouse.move(0, 0, 1);
+      accum = 0;
+    }
    timer = millis();
    }
   }
