@@ -28,7 +28,6 @@ void setup() {
   pinMode(BTN_L, INPUT_PULLUP);
   pinMode(BTN_M, INPUT_PULLUP);
   pinMode(BTN_R, INPUT_PULLUP);
-  pinMode(BTN_SENS, INPUT_PULLUP)
   Mouse.begin();
   Keyboard.begin();
 }

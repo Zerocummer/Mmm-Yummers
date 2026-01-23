@@ -62,8 +62,12 @@ void loop() {
     if (digitalRead(BTN_L) == LOW) Mouse.press(MOUSE_LEFT);   else Mouse.release(MOUSE_LEFT);
     if (digitalRead(BTN_M) == LOW) Mouse.press(MOUSE_MIDDLE); else Mouse.release(MOUSE_MIDDLE);
     if (digitalRead(BTN_R) == LOW) Mouse.press(MOUSE_RIGHT); else Mouse.release(MOUSE_RIGHT);
-    if (digitalRead(BTN_SENS) == LOW && sens == 0.5) sens = 1;
-    else if (digitalRead(BTN_SENS) == LOW && sens == 1) sens = 0.5;
+    if (digitalRead(BTN_SENS) == LOW && sens == 0.2){
+      sens = 1;
+      delay(150);}
+    else if (digitalRead(BTN_SENS) == LOW && sens == 1) {
+      sens = 0.2;
+      delay(150);}
     timer = millis();
   }
 }
