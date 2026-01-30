@@ -5,6 +5,7 @@
 MPU6050 mpu(Wire);
 #define PIN_S1 4
 #define PIN_S2 5
+#define BTN_SENS 6
 static const int8_t encTable[16] = {
   0, -1,  1,  0,
   1,  0,  0, -1,
@@ -18,6 +19,7 @@ const uint8_t BTN_L = 7;
 const uint8_t BTN_M = 8;
 const uint8_t BTN_R = 9;
 uint32_t timer = 0;
+float sens = 1;
 void setup() {
   Wire.begin();
   while (mpu.begin() != 0) delay(10);
@@ -28,10 +30,11 @@ void setup() {
   pinMode(BTN_L, INPUT_PULLUP);
   pinMode(BTN_M, INPUT_PULLUP);
   pinMode(BTN_R, INPUT_PULLUP);
+  pinMode(BTN_SENS, INPUT_PULLUP);
   Mouse.begin();
   Keyboard.begin();
 }
-void updateEncoder() {
+void updateEncoder() { // Управляем колесом мыши
   uint8_t newAB = (digitalRead(PIN_S1) << 1) | digitalRead(PIN_S2);
   uint8_t idx   = (lastAB << 2) | newAB;
   int8_t  step  = encTable[idx & 0x0F];
@@ -51,14 +54,20 @@ void loop() {
     int x = 0, y = 0;
     int ax = mpu.getAngleX();
     int ay = mpu.getAngleY();
-    if      (ay >  6) y =  map(ay,  6, 10,  1, 10);
-    else if (ay < -6) y =  map(ay, -10, -6, -10, -1);
-    if      (ax >  6) x =  map(ax,  6, 10,  1, 10);
-    else if (ax < -6) x =  map(ax, -10, -6, -10, -1);
+    if      (ay >  6) y =  map(ay,  6, 10,  1, 10) / sens; // Определяем наклон гироскопа
+    else if (ay < -6) y =  map(ay, -10, -6, -10, -1) / sens;
+    if      (ax >  6) x =  map(ax,  6, 10,  1, 10) / sens;
+    else if (ax < -6) x =  map(ax, -10, -6, -10, -1) / sens;
     Mouse.move(y, x, 0);
     if (digitalRead(BTN_L) == LOW) Mouse.press(MOUSE_LEFT);   else Mouse.release(MOUSE_LEFT);
     if (digitalRead(BTN_M) == LOW) Mouse.press(MOUSE_MIDDLE); else Mouse.release(MOUSE_MIDDLE);
     if (digitalRead(BTN_R) == LOW) Mouse.press(MOUSE_RIGHT); else Mouse.release(MOUSE_RIGHT);
+    if (digitalRead(BTN_SENS) == LOW && sens == 0.2){ // Меняем чувствительность мыши
+      sens = 1;
+      delay(150);}
+    else if (digitalRead(BTN_SENS) == LOW && sens == 1) {
+      sens = 0.2;
+      delay(150);}
     timer = millis();
   }
 }
