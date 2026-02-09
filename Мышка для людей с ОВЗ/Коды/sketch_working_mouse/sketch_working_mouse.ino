@@ -58,7 +58,7 @@ void loop() {
     else if (ay < -6) y =  map(ay, -10, -6, -10, -1) / sens;
     if      (ax >  6) x =  map(ax,  6, 10,  1, 10) / sens;
     else if (ax < -6) x =  map(ax, -10, -6, -10, -1) / sens;
-    Mouse.move(y, x, 0);
+    Mouse.move(x, y, 0);
     if (digitalRead(BTN_L) == LOW) Mouse.press(MOUSE_LEFT);   else Mouse.release(MOUSE_LEFT);
     if (digitalRead(BTN_M) == LOW) Mouse.press(MOUSE_MIDDLE); else Mouse.release(MOUSE_MIDDLE);
     if (digitalRead(BTN_R) == LOW) Mouse.press(MOUSE_RIGHT); else Mouse.release(MOUSE_RIGHT);
