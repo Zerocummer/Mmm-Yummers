@@ -22,8 +22,6 @@ uint32_t timer = 0;
 float sens = 1;
 void setup() {
   Wire.begin();
-  while (mpu.begin() != 0) delay(10);
-  mpu.calcOffsets();
   pinMode(PIN_S1, INPUT_PULLUP);
   pinMode(PIN_S2, INPUT_PULLUP);
   lastAB = (digitalRead(PIN_S1) << 1) | digitalRead(PIN_S2);
@@ -48,17 +46,8 @@ void updateEncoder() { // Управляем колесом мыши
   }
 }
 void loop() {
-  mpu.update();
   updateEncoder();
   if (millis() - timer > 60) {
-    int x = 0, y = 0;
-    int ax = mpu.getAngleX();
-    int ay = mpu.getAngleY();
-    if      (ay >  6) y =  map(ay,  6, 10,  1, 10) / sens; // Определяем наклон гироскопа
-    else if (ay < -6) y =  map(ay, -10, -6, -10, -1) / sens;
-    if      (ax >  6) x =  map(ax,  6, 10,  1, 10) / sens;
-    else if (ax < -6) x =  map(ax, -10, -6, -10, -1) / sens;
-    Mouse.move(y, x, 0);
     if (digitalRead(BTN_L) == LOW) Mouse.press(MOUSE_LEFT);   else Mouse.release(MOUSE_LEFT);
     if (digitalRead(BTN_M) == LOW) Mouse.press(MOUSE_MIDDLE); else Mouse.release(MOUSE_MIDDLE);
     if (digitalRead(BTN_R) == LOW) Mouse.press(MOUSE_RIGHT); else Mouse.release(MOUSE_RIGHT);
